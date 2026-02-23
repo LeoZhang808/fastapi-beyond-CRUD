@@ -64,7 +64,7 @@ Ensure you have the following installed:
 Start the application:
 
 ```bash
-fastapi dev src/
+python -m uvicorn src:app --host 0.0.0.0 --port 8000 --reload
 ```
 Alternatively, you can run the application using Docker:
 ```bash
@@ -78,3 +78,32 @@ pytest
 
 ## Contributing
 I welcome contributions to improve the documentation! You can contribute [here](https://github.com/jod35/fastapi-beyond-crud-docs).
+
+## Assignment Updates
+
+This repository includes updates made to support CI/CD demonstration requirements:
+
+- Docker startup was changed from `fastapi run ...` to `python -m uvicorn src:app ...` to avoid container startup failure when the `fastapi` executable is not available in PATH.
+- The nightly workflow now skips semantic-release unless running on `main` and a `package.json` file exists. This prevents Node-specific release tooling from failing in this Python project.
+- A temporary failing test can be added to demonstrate failure notifications in GitHub Actions, then removed after recording.
+- Conventional Commit format is used for commit messages (for example: `fix(docker): ...`, `ci(workflow): ...`, `test(ci): ...`).
+
+## Items Needed To Make Everything Work
+
+1. Fix Docker runtime command in `Dockerfile`:
+   - Use `CMD ["python", "-m", "uvicorn", "src:app", "--host", "0.0.0.0", "--port", "8000"]`.
+2. Rebuild containers after Dockerfile changes:
+   - `docker compose down`
+   - `docker compose build --no-cache`
+   - `docker compose up`
+3. Fix nightly workflow failure caused by semantic-release:
+   - Add a condition so semantic-release only runs on `main` and when `package.json` exists.
+4. Ensure required GitHub repository secrets are configured:
+   - App/test secrets (for example `DATABASE_URL`, `JWT_SECRET`, `REDIS_URL`)
+   - Mail secrets (`EMAIL_USER`, `EMAIL_PASS`)
+5. Verify failure-notification path:
+   - Push a temporary failing test to a test branch.
+   - Trigger `Nightly Build and Test` manually using `workflow_dispatch`.
+   - Confirm `Run Tests` fails and `Send email on test failure` executes.
+6. Clean up after demo:
+   - Remove temporary failing test and push a cleanup commit.
