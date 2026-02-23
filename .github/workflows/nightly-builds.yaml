@@ -47,21 +47,22 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pytest
+          pip install aiosqlite
       - name: Run Tests
         id: run-tests
         env:
-          # Required environment variables for app/tests
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          JWT_ALGORITHM: ${{ secrets.JWT_ALGORITHM }}
-          MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
-          MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
-          MAIL_SERVER: ${{ secrets.MAIL_SERVER }}
-          MAIL_PORT: ${{ secrets.MAIL_PORT }}
-          MAIL_FROM: ${{ secrets.MAIL_FROM }}
-          MAIL_FROM_NAME: ${{ secrets.MAIL_FROM_NAME }}
-          DOMAIN: ${{ secrets.DOMAIN }}
-          REDIS_URL: ${{ secrets.REDIS_URL }}
+          # Hardcoded CI values to avoid missing GitHub secrets
+          DATABASE_URL: sqlite+aiosqlite:///./test.db
+          JWT_SECRET: ci-test-secret
+          JWT_ALGORITHM: HS256
+          MAIL_USERNAME: ci@example.com
+          MAIL_PASSWORD: ci-password
+          MAIL_SERVER: smtp.ethereal.email
+          MAIL_PORT: "587"
+          MAIL_FROM: ci@example.com
+          MAIL_FROM_NAME: CI Bot
+          DOMAIN: http://localhost:8000
+          REDIS_URL: redis://localhost:6379/0
         run: python -m pytest src/tests 2>&1 | tee /tmp/pytest_output.txt; exit ${PIPESTATUS[0]}
 
       - name: Capture latest commit author email
